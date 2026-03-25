@@ -14,8 +14,8 @@ router.post("/register-doctor", async (req, res) => {
         if (isAnyEmpty(email, fullName, password)) {
             return res.status(400).json({ message: "blank details" });
         }
-        const doctor = user_doctor.findOne({email});
-        if(doctor) return res.status(400).json({reason:"email",message:"user with this email already exist"})
+        const doctor = await user_doctor.findOne({ email });
+        if (doctor) return res.status(400).json({ reason: "email", message: "user with this email already exist" })
         await user_doctor.insertOne({ email, fullName, password });
 
         return res.status(201).json({ message: "insertion success" });
@@ -34,8 +34,8 @@ router.post("/register-caretaker", async (req, res) => {
             return res.status(400).json({ message: "blank details" });
         }
 
-        const caretaker = user_caretaker.findOne({email});
-        if(caretaker) return res.status(400).json({reason:"email",message:"user with this email already exist"})
+        const caretaker = await user_caretaker.findOne({ email });
+        if (caretaker) return res.status(400).json({ reason: "email", message: "user with this email already exist" })
         await user_caretaker.insertOne({ email, fullName, password, doctor_id });
 
         return res.status(201).json({ message: "insertion success" });
@@ -45,6 +45,29 @@ router.post("/register-caretaker", async (req, res) => {
         return res.status(500).json({ message: "server error" });
     }
 });
+
+router.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (isAnyEmpty(email, password)) {
+            return res.status(400).json({ message: "blank details" });
+        }
+        const doctor = await user_doctor.findOne({ email, password });
+        if (doctor) return res.status(200).json({ message: "login success" })
+
+        const caretaker = await user_caretaker.findOne({ email, password });
+        if (caretaker) return res.status(200).json({ message: "login success" })
+
+
+        return res.status(400).json({ message: "invalid credentials" })
+
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "server error" });
+    }
+});
+
 
 
 export default router
