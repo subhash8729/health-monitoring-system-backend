@@ -31,9 +31,9 @@ router.post("/upload-health-data",async (req, res) => {
 
 router.post("/start-monitoring",async (req,res)=>{
     try {
-        const {device_id, patient_id} = req.body;
+        const {device_id, patient_id, patient_name} = req.body;
         await monitoring_collection.deleteMany({device_id});
-        await monitoring_collection.insertOne({device_id, patient_id,time_stamp:new Date()});
+        await monitoring_collection.insertOne({device_id, patient_id, patient_name, time_stamp:new Date()});
         return res.status(200).json({message:"Insertion success"});
     } catch (error) {
         console.log(error);
@@ -48,7 +48,7 @@ router.post("/get-active-session", async(req,res)=>{
         if(!device) return res.status(400).json({message:"no active session"})
         const result = isLessThan1Min(device.time_stamp);
         if(!result) return res.status(400).json({message:"no active session"})
-        if(result) return res.status(200).json({patient_id:device.patient_id});
+        if(result) return res.status(200).json({patient_id:device.patient_id, patient_name:device.patient_name});
 
     } catch (error) {
         console.log("error in get-active-session",error)
