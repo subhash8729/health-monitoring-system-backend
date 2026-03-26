@@ -1,7 +1,7 @@
 import express from "express"
 import { db } from "../database.js"
 import { isAnyEmpty } from "../functions/emptyCheck.js";
-import { generatePatientId, isLessThan1Min } from "../functions/generalfunction.js";
+import { generatePatientId, isLessThan1Min, randomString } from "../functions/generalfunction.js";
 
 
 
@@ -31,101 +31,101 @@ router.post("/upload-health-data", async (req, res) => {
 
 
 })
+
 router.post("/upload-heart-rate", async (req, res) => {
-    try {
-        const { heart_rate, device_id, patient_id } = req.body;
-        if (isAnyEmpty(device_id, patient_id, heart_rate)) {
-            return res.status(400).json({ message: "blank details" });
-        }
-
+    const { heart_rate, spo2, session_key } = req.body;
+    if (!spo2 || !heart_rate) {
+        return res.status(400).json({ message: "blank details" });
+    }
+    const patient_data = await monitoring_collection.findOne({ session_key });
+    const device_datas = await device_data.findOne({ session_key });
+    if (device_datas) {
         await device_data.findOneAndUpdate(
-            { device_id },
-            { $set: { patient_id, heart_rate } }
+            { session_key },
+            { $set: { patient_id: patient_data.patient_id, device_id: patient_data.device_id, spo2, heart_rate } }
+        );
+        return res.status(200).json({ message: "success" })
+    }
+    else {
+        await device_data.insertOne(
+            { patient_id: patient_data.patient_id, device_id: patient_data.device_id, time_stamp: patient_data.time_stamp, session_key, spo2, heart_rate }
         );
 
         return res.status(200).json({ message: "insertion success" });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "server error" })
     }
-})
-
-router.post("/upload-spo2", async (req, res) => {
-    try {
-        const { spo2, device_id, patient_id } = req.body;
-        if (isAnyEmpty(device_id, patient_id, spo2)) {
-            return res.status(400).json({ message: "blank details" });
-        }
-
-        await device_data.findOneAndUpdate(
-            { device_id },
-            { $set: { patient_id, spo2 } }
-        );
-
-        return res.status(200).json({ message: "insertion success" });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "server error" })
-    }
-
 })
 
 router.post("/upload-temprature", async (req, res) => {
-    try {
-        const { temprature, device_id, patient_id } = req.body;
-        if (isAnyEmpty(device_id, patient_id, temprature)) {
-            return res.status(400).json({ message: "blank details" });
-        }
-
-        await device_data.insertOne({
-            device_id, patient_id, temprature 
-        })
-
-return res.status(200).json({ message: "insertion success" });
-
-    } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "server error" })
-}
-
-})
-
-router.post("/upload-ecg", async (req, res) => {
-    try {
-        const { ecg, device_id, patient_id } = req.body;
-        if (isAnyEmpty(device_id, patient_id, ecg)) {
-            return res.status(400).json({ message: "blank details" });
-        }
-
+    const { temprature, session_key } = req.body;
+    if (!temprature) {
+        return res.status(400).json({ message: "blank details" });
+    }
+    const patient_data = await monitoring_collection.findOne({ session_key });
+    const device_datas = await device_data.findOne({ session_key });
+    if (device_datas) {
         await device_data.findOneAndUpdate(
-            { device_id },
-            { $set: { patient_id, ecg } }
+            { session_key },
+            { $set: { patient_id: patient_data.patient_id, device_id: patient_data.device_id, temprature } }
+        );
+        return res.status(200).json({ message: "success" })
+    }
+    else {
+        await device_data.insertOne(
+            { patient_id: patient_data.patient_id, device_id: patient_data.device_id, time_stamp: patient_data.time_stamp, session_key, temprature }
         );
 
         return res.status(200).json({ message: "insertion success" });
+    }
+})
 
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "server error" })
+router.post("/upload-ecg", async (req, res) => {
+    const { ecg, session_key } = req.body;
+    if (!ecg) {
+        return res.status(400).json({ message: "blank details" });
+    }
+    const patient_data = await monitoring_collection.findOne({ session_key });
+    const device_datas = await device_data.findOne({ session_key });
+    if (device_datas) {
+        await device_data.findOneAndUpdate(
+            { session_key },
+            { $set: { patient_id: patient_data.patient_id, device_id: patient_data.device_id, ecg } }
+        );
+        return res.status(200).json({ message: "success" })
+    }
+    else {
+        await device_data.insertOne(
+            { patient_id: patient_data.patient_id, device_id: patient_data.device_id, time_stamp: patient_data.time_stamp, session_key, ecg }
+        );
+
+        return res.status(200).json({ message: "insertion success" });
     }
 
 })
 
 router.post("/upload-bp", async (req, res) => {
     try {
-        const { bp, device_id, patient_id } = req.body;
-        if (isAnyEmpty(device_id, patient_id, bp)) {
+        const { bp, session_key } = req.body;
+        if (!bp) {
             return res.status(400).json({ message: "blank details" });
         }
+        const patient_data = await monitoring_collection.findOne({ session_key });
+        const device_datas = await device_data.findOne({ session_key });
+        if (device_datas) {
+            await device_data.findOneAndUpdate(
+                { session_key },
+                { $set: { patient_id: patient_data.patient_id, device_id: patient_data.device_id, bp } }
+            );
+            return res.status(200).json({message:"success"})
+        }
+        else {
+            await device_data.insertOne(
+                { patient_id: patient_data.patient_id, device_id: patient_data.device_id, time_stamp: patient_data.time_stamp, session_key, bp }
+            );
 
-        await device_data.findOneAndUpdate(
-            { device_id },
-            { $set: { patient_id, bp } }
-        );
+            return res.status(200).json({ message: "insertion success" });
+        }
 
-        return res.status(200).json({ message: "insertion success" });
+
 
     } catch (error) {
         console.error(error);
@@ -137,8 +137,9 @@ router.post("/upload-bp", async (req, res) => {
 router.post("/start-monitoring", async (req, res) => {
     try {
         const { device_id, patient_id, patient_name } = req.body;
+        if (isAnyEmpty(device_id, patient_id, patient_name)) return res.status(400).json({ message: "blank fields" })
         await monitoring_collection.deleteMany({ device_id });
-        await monitoring_collection.insertOne({ device_id, patient_id, patient_name, time_stamp: new Date() });
+        await monitoring_collection.insertOne({ device_id, patient_id, patient_name, time_stamp: new Date(), session_key: randomString(6) });
         return res.status(200).json({ message: "Insertion success" });
     } catch (error) {
         console.log(error);
@@ -165,7 +166,7 @@ router.post("/get-active-session", async (req, res) => {
         if (!device) return res.status(400).json({ message: "no active session" })
         const result = isLessThan1Min(device.time_stamp);
         if (!result) return res.status(400).json({ message: "no active session" })
-        if (result) return res.status(200).json({ patient_id: device.patient_id, patient_name: device.patient_name });
+        if (result) return res.status(200).json({ patient_id: device.patient_id, patient_name: device.patient_name, session_key: device.session_key });
 
     } catch (error) {
         console.log("error in get-active-session", error)

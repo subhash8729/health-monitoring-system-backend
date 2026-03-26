@@ -36,4 +36,15 @@ export async function generatePatientId(increment) {
   await increment.insertOne({ doctor: numbers[0].doctor, caretaker: numbers[0].caretaker, patient: patient_num+1 });
   return patient_id;
 }
+export function randomString(len = 8) {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let res = "";
+  for (let i = 0; i < len; i++) {
+    res += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return res;
+}
 
+export async function get_patient_from_session_key(session_key){
+    const result = await db.collection("monitoring-collection").findOne({session_key})
+}
