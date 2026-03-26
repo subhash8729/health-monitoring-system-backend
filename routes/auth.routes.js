@@ -61,10 +61,10 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ message: "blank details" });
         }
         const doctor = await user_doctor.findOne({ email, password });
-        if (doctor) return res.status(200).json({ message: "login success",user_type:"doctor", doctor_id:doctor.doctor_id })
+        if (doctor) return res.status(200).json({ message: "login success",user_type:"doctor",fullName:doctor.fullName, doctor_id:doctor.doctor_id })
 
         const caretaker = await user_caretaker.findOne({ email, password });
-        if (caretaker) return res.status(200).json({ message: "login success",user_type:"caretaker", caretaker_id:caretaker.caretaker_id })
+        if (caretaker) return res.status(200).json({ message: "login success",user_type:"caretaker", fullName:caretaker.fullName, caretaker_id:caretaker.caretaker_id })
 
         return res.status(400).json({ message: "invalid credentials" })
 
