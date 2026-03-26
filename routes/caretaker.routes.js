@@ -38,7 +38,10 @@ router.post("/upload-heart-rate", async (req, res) => {
             return res.status(400).json({ message: "blank details" });
         }
 
-        await device_data.insertOne({ device_id, patient_id, heart_rate });
+        await device_data.findOneAndUpdate(
+            { device_id },
+            { $set: { patient_id, heart_rate } }
+        );
 
         return res.status(200).json({ message: "insertion success" });
 
@@ -76,17 +79,16 @@ router.post("/upload-temprature", async (req, res) => {
             return res.status(400).json({ message: "blank details" });
         }
 
-        await device_data.findOneAndUpdate(
-            { device_id },
-            { $set: { patient_id, temprature } }
-        );
+        await device_data.insertOne({
+            device_id, patient_id, temprature 
+        })
 
-        return res.status(200).json({ message: "insertion success" });
+return res.status(200).json({ message: "insertion success" });
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "server error" })
-    }
+    console.error(error);
+    return res.status(500).json({ message: "server error" })
+}
 
 })
 
@@ -177,11 +179,11 @@ router.post("/add-patient", async (req, res) => {
 
         if (isAnyEmpty(caretaker_id, patient_name, patient_age, patient_gender)) return res.status(400).json({ message: "blank details" })
         const patient_id = await generatePatientId(increment);
-    
+
         const caretaker = await user_caretaker.findOne({ caretaker_id })
-        if(!caretaker || !caretaker.device_id) return res.status(400).json({message:"either caretaker not registered or device not assigned"})
-        
-        await patient.insertOne({ device_id:caretaker.device_id, caretaker_id, patient_id, patient_name, patient_age, patient_gender })
+        if (!caretaker || !caretaker.device_id) return res.status(400).json({ message: "either caretaker not registered or device not assigned" })
+
+        await patient.insertOne({ device_id: caretaker.device_id, caretaker_id, patient_id, patient_name, patient_age, patient_gender })
         return res.status(200).json({ message: "insertion success" })
 
     } catch (error) {
